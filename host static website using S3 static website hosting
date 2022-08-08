@@ -1,0 +1,45 @@
+REGISTER DOMAIN
+Register a free domain on my.freenom.com e.g animals4life.ml
+Created a hosted zone for the registered domain using Route53 > Hosted Zones
+1 SOA and 4 NS records will be created in the Hosted Zone
+Edit the free domain and point it to the aws nameservers. All 4.
+
+CREATE BUCKET
+Go to S3 and create a bucket. Since you will be using a domain name, your bucket name should use the same domain e.g top10.animals4life.ml
+Pay attention to the region you created the bucket.
+Disable the block all public access. By doing this, you can later make this bucket accessible anonymously over the public internet. It is a safeguard so that you don't do this mistakenly.
+Keeping all other settings as default. Create the bucket
+
+SETUP STATIC WEBSITE HOSTING
+Next go to the properties of the new bucket and enable "Static website hosting". While doing this, specify your index.html and error.html file. I used the default names.
+upload or add your index.html, error.html and other related files and folders to your S3 bucket.
+Finally, you need to a bucket policy to your bucket so that you can access it from the public internet.
+Select your bucket and go to permissions
+Add the following JSON to your bucket policy and save changes. Remember to edit the resource to match your Bucket ARN.
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PublicRead",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::top10.animals4life.ml/*"
+        }
+    ]
+}
+
+POINT YOUR DOMAIN NAME TO THE S3 BUCKET
+Next create an alias A record under Hosted Zones to point to the S3 bucket endpoint.
+To do this, go to the registered domain name > create record > 
+record name = top10.animals4life.ml
+record type = A
+alias = yes
+routing policy = simple routing
+route traffic to = Alias to S3 website endpoint
+region = region you are hosting your bucket (us-east-1 in my case)
+enter s3 endpoint = select your bucket
+Create record
+
+Now, if you go to top10.animals4life.ml (your domain), it should load the index file of your static website.
