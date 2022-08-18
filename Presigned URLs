@@ -1,0 +1,44 @@
+This example will be carried out as the account administrator
+
+Presigned URLs can be used to grant temporary access to objects in a private bucket.
+You should keep in mind that the presigned url has the same access as the user who generated the URL and contains all the requirements to access the object. The access is only to the specified object and is time limited.
+Roles should not used to generate presigned URLs because they are temporary and the presigned URL will stop working as soon as the role expires
+
+For example, 
+----
+Create a bucket and add an object to it called all5.jpg using default settings. This object will only be accessible by the the owner and admin.
+Now generate a presigned url using any of these steps
+
+Using CloudShell
+enter the following
+
+aws s3 presign [object URI] --expires-in [duration in seconds]
+aws s3 presign s3://animals4lifemedia12985/all5.jpg --expires-in 180
+This will generate a long URL you can use to access the image.
+
+OR
+From the console
+Select the object > Object Actions > Share with presigned url
+enter the time before the URL expires
+select create presigned URL.
+The URL will be created and copied into your clipboard.
+----
+To test that it is using the administrator access,
+Go to your IAM user and add the following inline policy which denies access to S3
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Deny",
+            "Action": "s3:*",
+            "Resource": "*"
+        }
+    ]
+}
+
+After applying the inline policy, you will no longer be able to access S3.
+Retry the presigned URL and you will get an access denied message.
+
+When you remove the inline policy, you will regain access to S3 again and so will the presigned URL if it has not expired.
